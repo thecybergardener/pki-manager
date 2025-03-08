@@ -547,6 +547,7 @@ case "$1" in
         if [ -z "${2:-}" ]; then
             list_services
             # error "Usage: $0 check <service-name>"
+            exit 1
         fi
         check_expiration "${ROOT_DIR}/services/$2/certs/$2.crt" "$2"
         ;;
@@ -560,6 +561,3 @@ case "$1" in
         error "Unknown command: $1\nUse '$(basename "$0") help' for usage information"
         ;;
 esac
-
-# TODO: when creating a new cert with the same CN on the intermediate, script fails. Create safe fail and cleanup OR allow same CN for multiple services on same machine
-# TODO: Revoke certificate funtion
