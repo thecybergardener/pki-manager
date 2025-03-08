@@ -1,0 +1,165 @@
+# OpenSSL Configuration Template
+# This configuration file is used for managing your PKI infrastructure.
+# Rename this file to openssl.conf and modify the values as needed.
+
+###############################################################################
+# SECTION: Root CA
+# This section defines the behavior of the root Certificate Authority
+###############################################################################
+
+[ ca ]
+default_ca = root_ca
+
+[ root_ca ]
+# Directory and file locations - modify the base directory to match your setup
+dir               = pki/root              # Base directory
+certs             = $dir/certs            # Certificate storage
+new_certs_dir     = $dir/newcerts         # New certificates storage
+database          = $dir/index.txt        # Certificate database file
+serial            = $dir/serial           # Serial number file
+RANDFILE          = $dir/private/.rand    # Random number file
+
+# The root key and root certificate
+private_key       = $dir/private/ca.key   # Root CA private key
+certificate       = $dir/certs/ca.crt     # Root CA certificate
+
+# For certificate revocation lists
+default_crl_days  = 30                    # How long before next CRL
+
+# Encryption and message digest algorithms
+default_md        = sha384                # Default digest
+default_days      = 1825                   # Default cert validity duration
+preserve          = no                    # Keep passed DN ordering
+email_in_dn       = no                    # Add email to cert DN
+policy            = policy_strict         # Policy for signing certs
+
+###############################################################################
+# SECTION: Intermediate CA
+# This section defines the behavior of the signing Certificate Authority
+###############################################################################
+
+[ intermediate_ca ]
+dir               = pki/intermediate
+certs             = $dir/certs
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/private/.rand
+private_key       = $dir/private/intermediate.key
+certificate       = $dir/certs/intermediate.crt
+
+default_days      = 365                # 1 years
+default_crl_days  = 30
+default_md        = sha384
+preserve          = no
+policy            = policy_strict
+email_in_dn       = no
+unique_subject    = yes
+name_opt         = ca_default
+cert_opt         = ca_default
+copy_extensions   = copy
+
+###############################################################################
+# SECTION: Certificate Policies
+# These sections define the requirements for certificate contents
+###############################################################################
+
+# Policy for Root and Intermediate CAs - strict requirements
+[ policy_strict ]
+# The following fields MUST match between the CA and new certificates
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+# Policy for leaf certificates - more flexible requirements
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+###############################################################################
+# SECTION: Request Requirements
+# This section defines defaults for certificate requests
+###############################################################################
+
+[ req ]
+default_bits        = 2048                # Default key size
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only             # UTF-8 input only
+default_md          = sha384               # Default digest algorithm
+
+# Extension to add when the -x509 option is used (for self-signed certs)
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName             = Country Name (2 letter code)
+stateOrProvinceName     = State or Province Name
+localityName            = Locality Name
+organizationName        = Organization Name
+organizationalUnitName  = Organizational Unit Name
+commonName              = Common Name
+
+countryName_default             = US
+stateOrProvinceName_default     = State
+localityName_default            = City
+organizationName_default        = Home
+organizationalUnitName_default  = Lab
+commonName_default              = Root CA
+
+countryName_min                 = 2
+countryName_max                 = 2
+commonName_max                  = 64
+
+###############################################################################
+# SECTION: Certificate Extensions
+# These sections define the extensions added to different types of certificates
+###############################################################################
+
+# Root CA certificate extensions
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+# Intermediate CA certificate extensions
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+# Leaf certificate extensions for servers
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "OpenSSL Generated Server Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+# Leaf certificate extensions for clients
+[ client_cert ]
+basicConstraints = CA:FALSE
+nsCertType = client
+nsComment = "OpenSSL Generated Client Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature
+extendedKeyUsage = clientAuth
+
+###############################################################################
+# SECTION: CRL Distribution Extensions
+# This section defines extensions for CRLs
+###############################################################################
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always
