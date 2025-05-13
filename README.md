@@ -28,7 +28,7 @@ A Bash-based Public Key Infrastructure (PKI) managment tool that helps setup and
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/cybergardner/pki-manager.git
+git clone https://github.com/thecybergardener/pki-manager.git
 cd pki-manager
 ```
 
@@ -106,6 +106,11 @@ Creates a new certificate for a service:
 
 ### Check Certificate Expiration
 
+Checks when all services certificate will expire:
+```bash
+./pki-manager.sh check 
+```
+
 Checks when a service's certificate will expire:
 ```bash
 ./pki-manager.sh check nginx
@@ -178,6 +183,13 @@ Creates a backup of the PKI directory:
    ```bash
    openssl req -config openssl.conf -test
    ```
+
+## Future Planned Features
+
+- Certificate Revocation
+- Interactive init
+- Dockerized Version
+- Webserver to serve/download certificates
 
 ## License
 
